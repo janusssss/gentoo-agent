@@ -2,6 +2,7 @@ package tool
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -31,6 +32,7 @@ func Init() []goai.Tool {
 		allMCPTools = append(allMCPTools, toolsResult.Tools...)
 	}
 
+	fmt.Println(allMCPTools[0])
 	// Convert MCP tools to GoAI tools for the LLM.
 	return mcp.ConvertTools(client, allMCPTools)
 }

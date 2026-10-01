@@ -5,6 +5,7 @@ import (
 	"honi/internal/tool"
 	"log/slog"
 	"os"
+	"sync"
 
 	"github.com/zendev-sh/goai"
 	"github.com/zendev-sh/goai/provider"
@@ -16,6 +17,10 @@ var systemPrompt = `
 	说话简短口语化，像真人日常聊天。
 	禁止出现“当然可以”、“总的来说”这类AI套话，禁止大段分点罗列；
 	一次只回答核心问题，准备用句号另起一句时先删掉多余的话；观点明确，不懂就直说不知道。`
+
+var GetAgent = sync.OnceValue(func() *Agent {
+	return NewAgent()
+})
 
 type Agent struct {
 	llm  provider.LanguageModel
@@ -37,7 +42,7 @@ func NewAgent() *Agent {
 		llm: deepseek.Chat("deepseek-flash"),
 		opts: []goai.Option{
 			goai.WithSystem(systemPrompt),
-			goai.WithTools(tool.Init()...),
+			goai.WithTools(tool.ControlPc()),
 			goai.WithMaxSteps(10),
 			/*
 				goai.WithOnRequest(func(ri goai.RequestInfo) {
