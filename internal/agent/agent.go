@@ -2,14 +2,14 @@ package agent
 
 import (
 	"context"
+	"honi/config"
 	"honi/internal/tool"
 	"log/slog"
-	"os"
 	"sync"
 
 	"github.com/zendev-sh/goai"
 	"github.com/zendev-sh/goai/provider"
-	"github.com/zendev-sh/goai/provider/deepseek"
+	"github.com/zendev-sh/goai/provider/openai"
 )
 
 var systemPrompt = `
@@ -27,19 +27,19 @@ type Agent struct {
 	opts []goai.Option
 }
 
-func (a *Agent) Ask(message string) string {
+func (a *Agent) Ask(message string) (string, error) {
 	a.opts = append(a.opts, goai.WithPrompt(message))
 	result, err := goai.GenerateText(context.Background(), a.llm, a.opts...)
 	if err != nil {
 		slog.Error("对话失败", "err", err)
-		os.Exit(1)
+		return "", err
 	}
-	return result.Text
+	return result.Text, nil
 }
 
 func NewAgent() *Agent {
 	return &Agent{
-		llm: deepseek.Chat("deepseek-flash"),
+		llm: openai.Chat(config.GetConfig().OpenAI.Model),
 		opts: []goai.Option{
 			goai.WithSystem(systemPrompt),
 			goai.WithTools(tool.ControlPc()),

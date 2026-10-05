@@ -1,0 +1,4 @@
+[openAI]
+provider="openAI"
+model="mimo-v2.6-flash"
+bash_url="https://token-plan-cn.xiaomimimo.com/v1"

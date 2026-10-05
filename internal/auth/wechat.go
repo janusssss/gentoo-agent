@@ -54,7 +54,11 @@ func (w *Wechat) Login() error {
 		if text == "" {
 			return nil
 		}
-		return w.bot.Reply(ctx, msg, agent.GetAgent().Ask(text))
+		answer, err := agent.GetAgent().Ask(text)
+		if err != nil {
+			return err
+		}
+		return w.bot.Reply(ctx, msg, answer)
 	})
 
 	return nil
