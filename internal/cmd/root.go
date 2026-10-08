@@ -4,6 +4,7 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"honi/internal/tea"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -14,6 +15,9 @@ var rootCmd = &cobra.Command{
 	Use:   "honi",
 	Short: "gentoo helper",
 	Long:  `a LLM helper for gentoo, she is a nice girl`,
+	Run: func(cmd *cobra.Command, args []string) {
+		tea.Chat()
+	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
