@@ -46,10 +46,11 @@ func (a *Agent) Ask(message string) (string, error) {
 }
 
 func NewAgent() *Agent {
+	conf := config.GetConfig()
 	return &Agent{
 		llm: openai.Chat(config.GetConfig().LLM.Model),
 		opts: []goai.Option{
-			goai.WithSystem(systemPrompt),
+			goai.WithSystem(conf.SystemPrompt),
 			goai.WithTools(tool.ControlPc()),
 			goai.WithMaxSteps(10),
 			/*
