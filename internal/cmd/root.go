@@ -15,8 +15,8 @@ var rootCmd = &cobra.Command{
 	Use:   "honi",
 	Short: "gentoo helper",
 	Long:  `a LLM helper for gentoo, she is a nice girl`,
-	Run: func(cmd *cobra.Command, args []string) {
-		tea.Chat()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return tea.Chat()
 	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:

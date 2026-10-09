@@ -5,6 +5,7 @@ import (
 	"honi/config"
 	"honi/internal/tool"
 	"log/slog"
+	"os"
 	"sync"
 
 	"github.com/zendev-sh/goai"
@@ -19,6 +20,13 @@ var systemPrompt = `
 	一次只回答核心问题，准备用句号另起一句时先删掉多余的话；观点明确，不懂就直说不知道。`
 
 var GetAgent = sync.OnceValue(func() *Agent {
+	llm := config.GetConfig().LLM
+	if err := os.Setenv("OPENAI_API_KEY", llm.ApiKey); err != nil {
+		panic(err)
+	}
+	if err := os.Setenv("OPENAI_BASE_URL", llm.BaseUrl); err != nil {
+		panic(err)
+	}
 	return NewAgent()
 })
 
@@ -39,7 +47,7 @@ func (a *Agent) Ask(message string) (string, error) {
 
 func NewAgent() *Agent {
 	return &Agent{
-		llm: openai.Chat(config.GetConfig().OpenAI.Model),
+		llm: openai.Chat(config.GetConfig().LLM.Model),
 		opts: []goai.Option{
 			goai.WithSystem(systemPrompt),
 			goai.WithTools(tool.ControlPc()),

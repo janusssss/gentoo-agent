@@ -19,15 +19,15 @@ func newConfigCmd() *cobra.Command {
 		Use:   "config",
 		Short: "配置程序运行参数",
 	}
-	cmd.Flags().StringVar(&conf.OpenAI.Provider, "provider", "openAI", "设置LLM厂商或兼容厂商")
-	cmd.Flags().StringVar(&conf.OpenAI.Model, "model", "mimo-v2.6-flash", "设置LLM调用模型名称")
-	cmd.Flags().StringVar(&conf.OpenAI.BaseUrl, "base_url", "https://token-plan-cn.xiaomimimo.com/v1", "设置LLM调用url")
-	cmd.Flags().StringVar(&conf.OpenAI.ApiKey, "api_key", "", "设置LLM调用key")
+	cmd.Flags().StringVar(&conf.LLM.Provider, "provider", conf.LLM.Provider, "设置LLM厂商或兼容厂商")
+	cmd.Flags().StringVar(&conf.LLM.Model, "model", conf.LLM.Model, "设置LLM调用模型名称")
+	cmd.Flags().StringVar(&conf.LLM.BaseUrl, "base_url", conf.LLM.BaseUrl, "设置LLM调用url")
+	cmd.Flags().StringVar(&conf.LLM.ApiKey, "api_key", conf.LLM.ApiKey, "设置LLM调用key")
 	cmd.Flags().BoolVarP(&list, "list", "l", false, "查看配置列表")
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		conf := config.GetConfig()
-		if list || cmd.Flags().NArg() == 0 {
+		if list || cmd.Flags().NFlag() == 0 {
 			buff, err := toml.Marshal(conf)
 			if err != nil {
 				return err
@@ -35,6 +35,7 @@ func newConfigCmd() *cobra.Command {
 			fmt.Print(string(buff))
 			return nil
 		}
+
 		if conf.Compare() {
 			slog.Warn("config is duplicate")
 			return nil

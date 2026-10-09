@@ -25,8 +25,8 @@ var GetConfig = sync.OnceValue(func() *Config {
 })
 
 type Config struct {
-	OpenAI LLM `toml:"openAI"`
-	path   string
+	LLM  LLM `toml:"LLM"`
+	path string
 }
 
 type LLM struct {

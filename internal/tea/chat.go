@@ -5,7 +5,7 @@ package tea
 
 import (
 	"fmt"
-	"os"
+	"honi/internal/agent"
 	"strings"
 
 	"charm.land/bubbles/v2/cursor"
@@ -15,11 +15,12 @@ import (
 	"charm.land/lipgloss/v2"
 )
 
-func Chat() {
+func Chat() error {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "Oof: %v\n", err)
+		return err
 	}
+	return nil
 }
 
 type model struct {
@@ -88,7 +89,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			fmt.Println(m.textarea.Value())
 			return m, tea.Quit
 		case "enter":
-			m.messages = append(m.messages, m.senderStyle.Render("You: ")+m.textarea.Value())
+			sendMsg := m.textarea.Value()
+			m.messages = append(m.messages, m.senderStyle.Render(sendMsg))
+			answer, err := agent.GetAgent().Ask(sendMsg)
+			if err != nil {
+				panic(err)
+			}
+			m.messages = append(m.messages, answer)
 			m.viewport.SetContent(lipgloss.NewStyle().Width(m.viewport.Width()).Render(strings.Join(m.messages, "\n")))
 			m.textarea.Reset()
 			m.viewport.GotoBottom()
