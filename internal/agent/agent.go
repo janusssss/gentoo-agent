@@ -1,10 +1,13 @@
 package agent
 
 import (
+	"bytes"
 	"context"
 	"honi/config"
 	"honi/internal/tool"
+	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"sync"
 
@@ -45,10 +48,21 @@ func (a *Agent) Ask(message string) (string, error) {
 	return result.Text, nil
 }
 
+type dumpTransport struct{ base http.RoundTripper }
+
+func (d dumpTransport) RoundTrip(r *http.Request) (*http.Response, error) {
+	body, _ := io.ReadAll(r.Body)
+	r.Body = io.NopCloser(bytes.NewReader(body))
+	slog.Debug("request LLM", "body:", string(body))
+	return d.base.RoundTrip(r)
+}
 func NewAgent() *Agent {
+
 	conf := config.GetConfig()
 	return &Agent{
-		llm: openai.Chat(config.GetConfig().LLM.Model),
+		llm: openai.Chat(config.GetConfig().LLM.Model, openai.WithHTTPClient(&http.Client{
+			Transport: &dumpTransport{base: http.DefaultTransport},
+		})),
 		opts: []goai.Option{
 			goai.WithSystem(conf.SystemPrompt),
 			goai.WithTools(tool.ControlPc()),

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"errors"
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"os"
@@ -25,9 +26,10 @@ var GetConfig = sync.OnceValue(func() *Config {
 })
 
 type Config struct {
-	LLM          LLM `toml:"LLM"`
-	SystemPrompt string
+	LLM          LLM    `toml:"LLM"`
+	SystemPrompt string `toml:"-"`
 	path         string
+	Debug        bool `toml:"debug"`
 }
 
 type LLM struct {
@@ -71,6 +73,12 @@ func newConfig() (*Config, error) {
 	}
 	conf.SystemPrompt = string(buff)
 
+	if conf.Debug {
+		logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		}))
+		slog.SetDefault(logger)
+	}
 	return conf, nil
 }
 

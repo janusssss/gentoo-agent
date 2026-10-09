@@ -1,4 +1,6 @@
+debug = true
 [LLM]
   provider = "openAi"
-  model = "mimo-v2.6-pro"
+  model = "mimo-v2.6-flash"
   base_url = "https://token-plan-cn.xiaomimimo.com/v1"
+
