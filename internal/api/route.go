@@ -11,6 +11,7 @@ import (
 func Run() {
 	app := fiber.New()
 	app.Get(common.RunBot, LoginWechat)
+	app.Post("/v1/chat/completions", wechatBot)
 
 	app.Hooks().OnListen(func(data fiber.ListenData) error {
 		bot := auth.GetWechatBot()

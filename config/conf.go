@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"embed"
 	"errors"
-	"fmt"
 	"io/fs"
 	"log/slog"
 	"os"
@@ -29,7 +28,8 @@ type Config struct {
 	LLM          LLM    `toml:"LLM"`
 	SystemPrompt string `toml:"-"`
 	path         string
-	Debug        bool `toml:"debug"`
+	Debug        bool  `toml:"debug"`
+	MCPs         []MCP `toml:"MCP"`
 }
 
 type LLM struct {
@@ -37,6 +37,11 @@ type LLM struct {
 	Model    string `toml:"model"`
 	BaseUrl  string `toml:"base_url"`
 	ApiKey   string `toml:"api_key"`
+}
+
+type MCP struct {
+	Name   string `toml:"name"`
+	ApiKey string `toml:"name"`
 }
 
 func newConfig() (*Config, error) {

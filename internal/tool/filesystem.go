@@ -2,7 +2,6 @@ package tool
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -10,7 +9,7 @@ import (
 	"github.com/zendev-sh/goai/mcp"
 )
 
-func Init() []goai.Tool {
+func newFileSystem() ([]goai.Tool, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*60)
 	transport := mcp.NewStdioTransport("mcp-filesystem-server", []string{"/home/janus/"})
 	client := mcp.NewClient("mcp-filesystem-server", "", mcp.WithTransport(transport))
@@ -21,18 +20,17 @@ func Init() []goai.Tool {
 	// Collect all tools with pagination.
 	toolsResult, err := client.ListTools(ctx, nil)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	allMCPTools := toolsResult.Tools
 	for toolsResult.NextCursor != "" {
 		toolsResult, err = client.ListTools(ctx, &mcp.ListParams{Cursor: toolsResult.NextCursor})
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 		allMCPTools = append(allMCPTools, toolsResult.Tools...)
 	}
 
-	fmt.Println(allMCPTools[0])
 	// Convert MCP tools to GoAI tools for the LLM.
-	return mcp.ConvertTools(client, allMCPTools)
+	return mcp.ConvertTools(client, allMCPTools), nil
 }
