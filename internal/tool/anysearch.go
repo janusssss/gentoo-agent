@@ -13,7 +13,7 @@ type anysearch struct {
 
 func (a *anysearch) initialize() error {
 	a.name = "anysearch"
-	a.description = "Unified real-time search engine skill for AI agents." +
+	a.Description = "Unified real-time search engine skill for AI agents." +
 		" Supports general web search, vertical domain search, parallel batch search, and full-page content extraction."
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 	defer cancel()

@@ -11,7 +11,7 @@ import (
 type client struct {
 	*mcp.Client
 	name        string
-	description string
+	Description string
 }
 
 func (c client) tools() ([]goai.Tool, error) {
@@ -39,5 +39,5 @@ func (c *client) getName() string {
 }
 
 func (c *client) getDescription() string {
-	return c.description
+	return c.Description
 }
