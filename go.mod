@@ -11,6 +11,7 @@ require (
 	github.com/gofiber/fiber/v3 v3.5.0
 	github.com/mdp/qrterminal/v4 v4.0.0
 	github.com/spf13/cobra v1.10.2
+	github.com/stretchr/testify v1.12.1
 	github.com/zendev-sh/goai v0.10.4
 )
 
@@ -42,6 +43,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.74.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect

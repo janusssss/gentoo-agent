@@ -54,10 +54,20 @@ func (d dumpTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 	body, _ := io.ReadAll(r.Body)
 	r.Body = io.NopCloser(bytes.NewReader(body))
 	slog.Debug("request LLM", "body:", string(body))
-	return d.base.RoundTrip(r)
+	resp, err := d.base.RoundTrip(r)
+	if err != nil {
+		return nil, err
+	}
+
+	body, _ = io.ReadAll(resp.Body)
+	resp.Body = io.NopCloser(bytes.NewReader(body))
+	slog.Debug("resp", "status", resp.Status, "body", string(body))
+
+	return resp, err
 }
 func NewAgent() *Agent {
 	conf := config.GetConfig()
+
 	return &Agent{
 		llm: openai.Chat(config.GetConfig().LLM.Model, openai.WithHTTPClient(&http.Client{
 			Transport: &dumpTransport{base: http.DefaultTransport},
@@ -99,6 +109,10 @@ func (a *Agent) optionByMessage(prompt string) []goai.Option {
 		goai.WithPrompt(prompt),
 		goai.WithOnResponse(func(ri goai.ResponseInfo) {
 			fmt.Printf("response:%+v\n\n", ri)
+		}),
+		goai.WithOnBeforeStep(func(bsi goai.BeforeStepInfo) goai.BeforeStepResult {
+			fmt.Printf("step before:%+v\n\n", bsi)
+			return goai.BeforeStepResult{}
 		}),
 	}
 }
