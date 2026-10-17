@@ -25,5 +25,4 @@ func (a *anysearch) initialize() error {
 	}
 
 	return nil
-
 }

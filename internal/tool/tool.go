@@ -16,6 +16,8 @@ var GetMCPResource = sync.OnceValue(func() *MCPResource {
 			&anysearch{},
 			&fileSystem{},
 		},
+		mu:      &sync.Mutex{},
+		toolMap: make(map[string][]goai.Tool),
 	}
 	m.initTool()
 	return m
@@ -35,17 +37,16 @@ type mcpClient interface {
 	getDescription() string
 }
 
-func (m *MCPResource) fetchTool(clients ...mcpClient) error {
+func (m *MCPResource) fetchTool() error {
 	wg := sync.WaitGroup{}
-	wg.Add(len(clients))
-	for _, c := range clients {
+	wg.Add(len(m.clients))
+	for _, c := range m.clients {
 		go func() {
 			defer wg.Done()
 			if err := c.initialize(); err != nil {
 				slog.Error("connect to map server failed", "err", err)
 				return
 			}
-			fmt.Println("name:", c.getName())
 
 			tools, err := c.tools()
 			if err != nil {
@@ -56,7 +57,6 @@ func (m *MCPResource) fetchTool(clients ...mcpClient) error {
 			m.mu.Lock()
 			m.toolMap[c.getName()] = tools
 			m.mu.Unlock()
-
 		}()
 	}
 
@@ -67,7 +67,6 @@ func (m *MCPResource) fetchTool(clients ...mcpClient) error {
 func (m *MCPResource) toolSetSchema() string {
 	var schema strings.Builder
 	for _, c := range m.clients {
-		fmt.Println(c.getDescription())
 		fmt.Fprintln(&schema, c.getName(), ":", c.getDescription())
 	}
 	return schema.String()
@@ -75,11 +74,11 @@ func (m *MCPResource) toolSetSchema() string {
 
 func (m *MCPResource) initTool() ([]goai.Tool, error) {
 	m.fetchTool()
-	tool := goai.NewTool(
+	_ = goai.NewTool(
 		"加载工具资源",
 		"加载资源，开放如下工具资源以供使用:\n"+m.toolSetSchema(),
 		func(ctx context.Context, in struct {
-			Name string `json:"name" jsonschema:"description=需用开启工具资源name"`
+			Name string `json:"name" jsonschema:"description=需要开启工具资源name"`
 		}) (string, error) {
 			tools := m.toolMap[in.Name]
 			if len(tools) == 0 {
@@ -89,7 +88,9 @@ func (m *MCPResource) initTool() ([]goai.Tool, error) {
 			return in.Name + "资源已启用", nil
 		})
 
-	m.active = append(m.active, tool)
+	for _, tools := range m.toolMap {
+		m.active = append(m.active, tools...)
+	}
 	return m.active, nil
 }
 

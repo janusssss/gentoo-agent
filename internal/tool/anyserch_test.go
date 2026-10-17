@@ -3,6 +3,9 @@ package tool
 import (
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAnysearchTool(t *testing.T) {
@@ -15,4 +18,11 @@ func TestAnysearchTool(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Printf("%+v", tools)
+}
+
+func TestGetName(t *testing.T) {
+	var c mcpClient = &anysearch{}
+	err := c.initialize()
+	assert.NoError(t, err)
+	require.Equal(t, "anysearch", c.getName())
 }
