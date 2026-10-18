@@ -25,7 +25,8 @@ var GetConfig = sync.OnceValue(func() *Config {
 })
 
 type Config struct {
-	LLM          LLM    `toml:"LLM"`
+	Provider     string
+	LLM          []LLM  `toml:"LLM"`
 	SystemPrompt string `toml:"-"`
 	path         string
 	Debug        bool  `toml:"debug"`

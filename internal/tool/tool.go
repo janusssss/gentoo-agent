@@ -13,7 +13,7 @@ import (
 var GetMCPResource = sync.OnceValue(func() *MCPResource {
 	m := &MCPResource{
 		clients: []mcpClient{
-			&anysearch{},
+			&Anysearch{},
 			&fileSystem{},
 		},
 		mu:      &sync.Mutex{},
