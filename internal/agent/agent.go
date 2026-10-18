@@ -25,10 +25,10 @@ var systemPrompt = `
 
 var GetAgent = sync.OnceValue(func() *Agent {
 	llm := config.GetConfig().LLM
-	if err := os.Setenv("OPENAI_API_KEY", llm.ApiKey); err != nil {
+	if err := os.Setenv("OPENAI_API_KEY", llm[0].ApiKey); err != nil {
 		panic(err)
 	}
-	if err := os.Setenv("OPENAI_BASE_URL", llm.BaseUrl); err != nil {
+	if err := os.Setenv("OPENAI_BASE_URL", llm[0].BaseUrl); err != nil {
 		panic(err)
 	}
 	return NewAgent()
@@ -69,7 +69,7 @@ func NewAgent() *Agent {
 	conf := config.GetConfig()
 
 	return &Agent{
-		llm: openai.Chat(config.GetConfig().LLM.Model, openai.WithHTTPClient(&http.Client{
+		llm: openai.Chat(config.GetConfig().LLM[0].Model, openai.WithHTTPClient(&http.Client{
 			Transport: &dumpTransport{base: http.DefaultTransport},
 		})),
 		opts: []goai.Option{
