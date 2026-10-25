@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"honi/config"
 	"honi/internal/tool"
 	"log/slog"
@@ -417,7 +416,6 @@ func (r *responsesRequest) requesMoreForOutput(reps responsesResponse) (string, 
 		return reps.OutputText, nil
 	}
 
-	fmt.Println(reps.OutputText)
 	for _, item := range reps.Output {
 		outputType, err := item.Type()
 		if err != nil {
@@ -451,29 +449,22 @@ func (r *responsesRequest) requesMoreForOutput(reps responsesResponse) (string, 
 				return "", err
 			}
 			for _, content := range callResult.Content {
-				val, err := content.MarshalJSON()
+				content, err := content.MarshalJSON()
 				if err != nil {
-					slog.Error("responsesRequest requesMoreForOutput MarshalJSON failed", "err", err)
+					return "", err
+				}
+				item := functionCallOutput{
+					CallId: functionCall.CallId,
+					Status: callResult.RequestState,
+					Output: string(content),
+					Tyep:   "function_call_output",
+				}
+				buff, err := json.Marshal(item)
+				if err != nil {
 					return "", nil
 				}
-				fmt.Println("content:", string(val))
+				r.Input = append(r.Input, buff)
 			}
-			content, err := callResult.Content[0].MarshalJSON()
-			if err != nil {
-				return "", err
-			}
-			item := functionCallOutput{
-				CallId: functionCall.CallId,
-				Status: callResult.RequestState,
-				Output: string(content),
-				Tyep:   "function_call_output",
-			}
-			buff, err := json.Marshal(item)
-			if err != nil {
-				return "", nil
-			}
-			fmt.Println("iput:", string(buff))
-			r.Input = append(r.Input, buff)
 		}
 	}
 

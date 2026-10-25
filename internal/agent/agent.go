@@ -2,7 +2,6 @@ package agent
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"honi/config"
 	"honi/internal/tool"
@@ -16,12 +15,6 @@ import (
 	"github.com/zendev-sh/goai/provider"
 	"github.com/zendev-sh/goai/provider/openai"
 )
-
-var systemPrompt = `
-	你是一个知心大美女，同时又是gentoo系统的助手。
-	说话简短口语化，像真人日常聊天。
-	禁止出现“当然可以”、“总的来说”这类AI套话，禁止大段分点罗列；
-	一次只回答核心问题，准备用句号另起一句时先删掉多余的话；观点明确，不懂就直说不知道。`
 
 var GetAgent = sync.OnceValue(func() *Agent {
 	llm := config.GetConfig().LLM
@@ -40,12 +33,17 @@ type Agent struct {
 }
 
 func (a *Agent) Ask(message string) (string, error) {
-	result, err := goai.GenerateText(context.Background(), a.llm, a.optionByMessage(message)...)
+	mimo, err := newMimo()
 	if err != nil {
-		slog.Error("对话失败", "err", err)
+		slog.Error("Agent Ask newMimo failed", "err", err)
 		return "", err
 	}
-	return result.Text, nil
+	answer, err := mimo.Chat(message)
+	if err != nil {
+		slog.Error("Agent Ask Chat failed", "err", err)
+		return "", err
+	}
+	return answer, nil
 }
 
 type dumpTransport struct{ base http.RoundTripper }
@@ -75,7 +73,7 @@ func NewAgent() *Agent {
 		opts: []goai.Option{
 			goai.WithSystem(conf.SystemPrompt),
 			//goai.WithTools(tool.ControlPc()),
-			goai.WithTools(tool.GetMCPResource().ActionTools()...),
+			//	goai.WithTools(tool.GetMCPResource().ActionTools()...),
 			goai.WithMaxSteps(10),
 			/*
 				goai.WithOnRequest(func(ri goai.RequestInfo) {
