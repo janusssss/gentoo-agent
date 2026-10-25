@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"honi/config"
 	"honi/internal/tool"
 	"io"
@@ -39,8 +40,7 @@ type Agent struct {
 }
 
 func (a *Agent) Ask(message string) (string, error) {
-	a.opts = append(a.opts, goai.WithPrompt(message))
-	result, err := goai.GenerateText(context.Background(), a.llm, a.opts...)
+	result, err := goai.GenerateText(context.Background(), a.llm, a.optionByMessage(message)...)
 	if err != nil {
 		slog.Error("对话失败", "err", err)
 		return "", err
@@ -57,7 +57,6 @@ func (d dumpTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 	return d.base.RoundTrip(r)
 }
 func NewAgent() *Agent {
-
 	conf := config.GetConfig()
 	return &Agent{
 		llm: openai.Chat(config.GetConfig().LLM.Model, openai.WithHTTPClient(&http.Client{
@@ -65,7 +64,8 @@ func NewAgent() *Agent {
 		})),
 		opts: []goai.Option{
 			goai.WithSystem(conf.SystemPrompt),
-			goai.WithTools(tool.ControlPc()),
+			//goai.WithTools(tool.ControlPc()),
+			goai.WithTools(tool.GetMCPResource().ActionTools()...),
 			goai.WithMaxSteps(10),
 			/*
 				goai.WithOnRequest(func(ri goai.RequestInfo) {
@@ -87,5 +87,18 @@ func NewAgent() *Agent {
 				}),
 			*/
 		},
+	}
+}
+
+func (a *Agent) optionByMessage(prompt string) []goai.Option {
+	return []goai.Option{
+		goai.WithSystem(config.GetConfig().SystemPrompt),
+		//goai.WithTools(tool.ControlPc()),
+		goai.WithTools(tool.GetMCPResource().ActionTools()...),
+		goai.WithMaxSteps(10),
+		goai.WithPrompt(prompt),
+		goai.WithOnResponse(func(ri goai.ResponseInfo) {
+			fmt.Printf("response:%+v\n\n", ri)
+		}),
 	}
 }

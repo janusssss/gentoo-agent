@@ -13,7 +13,7 @@ type fileSystem struct {
 
 func (f *fileSystem) initialize() error {
 	f.name = "file system server"
-	f.description = "provides secure access to the local filesystem via the Model Context Protocol"
+	f.Description = "provides secure access to the local filesystem via the Model Context Protocol"
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 	defer cancel()
 
